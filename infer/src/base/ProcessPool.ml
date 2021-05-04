@@ -368,7 +368,7 @@ let rec child_loop ~slot send_to_parent send_final receive_from_parent ~f ~epilo
     - execute [child_prologue]
     - execute [f] in a loop
     - once the loop ends, transmits the results of calling [epilogue] to the parent
-    - receives order from [orders_ic], send status updates through [updates_oc]
+    - receives orders from [orders_ic], send status updates through [updates_oc]
 
     Children never return. Instead they exit when done. *)
 let child slot ~f ~child_prologue ~epilogue ~updates_oc ~orders_ic =
@@ -431,7 +431,7 @@ let fork_child ~child_prologue ~slot (updates_r, updates_w) ~f ~epilogue =
       {pid; down_pipe= Unix.out_channel_of_descr to_child_w}
 
 
-(** Data marshalled to describe what a non-forked child must do. *)
+(** Data marshalled to describe what a child spawned by [spawn_child] below must do. *)
 type ('work, 'result, 'final) child_data =
   {slot: int; child_prologue: unit -> unit; f: 'work -> 'result option; epilogue: unit -> 'final}
 
@@ -481,7 +481,7 @@ let run_as_child () =
   child slot ~child_prologue ~f ~updates_oc ~orders_ic ~epilogue
 
 
-let active_pool = ref None
+let active_children_slots = ref None
 
 let () =
   (* Register an at-exit callback that forcefully kills any remaining sub-process when the parent
@@ -492,9 +492,9 @@ let () =
      And we do not do this if we are a sub-process ourselves, since we are not going to spawn
      new processes in this case. This is just a minor optimisation.
   *)
-  if not Config.is_child then
+  if Option.is_some Config.run_as_child then
     Epilogues.register_late
-      ~f:(fun () -> Option.iter !active_pool ~f:killall_silently)
+      ~f:(fun () -> Option.iter !active_children_slots ~f:killall_silently)
       ~description:"killing sub-processes"
 
 
@@ -520,7 +520,7 @@ let create :
   let children_updates = List.map children_pipes ~f:(fun (pipe_child_r, _) -> pipe_child_r) in
   let children_states = Array.create ~len:jobs Initializing in
   let pool = {slots; children_updates; jobs; task_bar; tasks= tasks (); children_states} in
-  active_pool := Some slots ;
+  active_children_slots := Some slots ;
   pool
 
 

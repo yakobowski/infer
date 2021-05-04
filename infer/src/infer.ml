@@ -50,7 +50,7 @@ let setup () =
              ( Driver.is_analyze_mode driver_mode
              || Config.(
                   continue_capture || infer_is_clang || infer_is_javac || reactive_mode
-                  || incremental_analysis || is_child) )
+                  || incremental_analysis || Option.is_some run_as_child) )
       then ResultsDir.remove_results_dir () ;
       ResultsDir.create_results_dir () ;
       if
@@ -153,9 +153,9 @@ let () =
   if has_results_dir && Config.debug_mode && CLOpt.is_originator then (
     L.progress "Logs in %s@." (ResultsDir.get_path Logs) ;
     Option.iter Config.scuba_execution_id ~f:(fun id -> L.progress "Execution ID %Ld@." id) ) ;
-  if Config.is_child then (
+  if Option.is_some Config.run_as_child then (
     InferAnalyze.register_active_checkers () ;
-    ProcessPool.run_as_child () (* This function never returns. *) ) ;
+    never_returns (ProcessPool.run_as_child ()) ) ;
   ( match Config.command with
   | _ when Config.test_determinator && not Config.process_clang_ast ->
       TestDeterminator.compute_and_emit_test_to_run ()

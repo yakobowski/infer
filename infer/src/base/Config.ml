@@ -2112,8 +2112,9 @@ and results_dir =
 
 
 and run_as_child =
-  CLOpt.mk_int ~in_help:[] ~default:(-1) ~long:"run-as-child"
-    "Enable child mode when greater than 0. This is an internal option."
+  CLOpt.mk_int_opt ~in_help:[] ~long:"run-as-child"
+    "Enable child mode when greater than 0. The integer argument is the identity of the child. \
+     This is an internal option."
 
 
 and seconds_per_iteration =
@@ -2732,8 +2733,6 @@ let process_linters_doc_url args =
   fun ~linter_id -> List.Assoc.find ~equal:String.equal linter_doc_url_assocs linter_id
 
 
-let is_child = !run_as_child >= 0
-
 (** Freeze initialized configuration values *)
 
 let rest = !rest
@@ -3125,7 +3124,7 @@ and process_clang_ast = !process_clang_ast
 and progress_bar =
   if !progress_bar && not !quiet then
     match !progress_bar_style with
-    | `Auto when Unix.(isatty stdin && isatty stderr) || is_child ->
+    | `Auto when Unix.(isatty stdin && isatty stderr) || not (Option.is_none !run_as_child) ->
         `MultiLine
     | `Auto ->
         `Plain
