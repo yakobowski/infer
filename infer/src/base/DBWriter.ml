@@ -386,7 +386,8 @@ module Server = struct
 end
 
 let use_daemon =
-  Config.((not (buck || genrule_mode)) && jobs > 1 && not (String.equal Sys.os_type "Win32"))
+  Config.((not (buck || genrule_mode)) && jobs > 1)
+  && match Version.build_platform with Linux | Darwin -> true | Windows -> false
 
 
 let perform cmd = if use_daemon then Server.send cmd else Command.execute cmd
