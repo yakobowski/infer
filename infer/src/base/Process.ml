@@ -66,15 +66,18 @@ let create_process_and_wait_with_output ~prog ~args action =
 
 
 let pipeline ~producer_prog ~producer_args ~consumer_prog ~consumer_args =
-  let open Unix in
-  let pipe_in, pipe_out = pipe () in
+  let pipe_in, pipe_out = Unix.pipe () in
   let producer_args = Array.of_list producer_args in
   let consumer_args = Array.of_list consumer_args in
-  let producer_pid = Caml_unix.create_process producer_prog producer_args stdin pipe_out stderr in
-  let consumer_pid = Caml_unix.create_process consumer_prog consumer_args pipe_in stdout stderr in
+  let producer_pid =
+    Caml_unix.create_process producer_prog producer_args Unix.stdin pipe_out Unix.stderr
+  in
+  let consumer_pid =
+    Caml_unix.create_process consumer_prog consumer_args pipe_in Unix.stdout Unix.stderr
+  in
   (* wait for children *)
-  let producer_status = waitpid (Pid.of_int producer_pid) in
-  let consumer_status = waitpid (Pid.of_int consumer_pid) in
-  close pipe_out ;
-  close pipe_in ;
+  let producer_status = Unix.waitpid (Pid.of_int producer_pid) in
+  let consumer_status = Unix.waitpid (Pid.of_int consumer_pid) in
+  Unix.close pipe_out ;
+  Unix.close pipe_in ;
   (producer_status, consumer_status)
