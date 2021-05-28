@@ -15,7 +15,7 @@ module L = Logging
 
 let cutoff_length = 100
 
-let crc_only = not (String.equal Sys.os_type "Unix")
+let crc_only = Stdlib.equal Version.Windows Version.build_platform
 
 let crc_token = '.'
 
