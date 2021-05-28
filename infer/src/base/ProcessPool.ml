@@ -492,7 +492,7 @@ let () =
      And we do not do this if we are a sub-process ourselves, since we are not going to spawn
      new processes in this case. This is just a minor optimisation.
   *)
-  if Option.is_some Config.run_as_child then
+  if Option.is_none Config.run_as_child then
     Epilogues.register_late
       ~f:(fun () -> Option.iter !active_children_slots ~f:killall_silently)
       ~description:"killing sub-processes"
