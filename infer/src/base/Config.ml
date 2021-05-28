@@ -1317,6 +1317,13 @@ and force_integration =
        |> String.concat ~sep:", " ))
 
 
+and fork_mode =
+  CLOpt.mk_bool ~long:"fork-mode"
+    ~default:(not (Stdlib.( = ) Version.build_platform Version.Windows))
+    "Use 'fork' system call to spawn sub-processes. If not set, use the equivalent of 'fork/exec' \
+     -- which  is usually slower, but is available on all OSes."
+
+
 and from_json_report =
   CLOpt.mk_path_opt ~long:"from-json-report"
     ~in_help:InferCommand.[(Report, manual_generic)]
@@ -2929,6 +2936,8 @@ and filtering = !filtering
 and force_delete_results_dir = !force_delete_results_dir
 
 and force_integration = !force_integration
+
+and fork_mode = !fork_mode
 
 and from_json_report =
   Option.value !from_json_report

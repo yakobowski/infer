@@ -300,6 +300,8 @@ val force_delete_results_dir : bool
 
 val force_integration : build_system option
 
+val fork_mode : bool
+
 val from_json_report : string
 
 val from_json_costs_report : string

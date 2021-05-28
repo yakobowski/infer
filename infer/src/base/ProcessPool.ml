@@ -510,7 +510,7 @@ let create :
  fun ~jobs ~child_prologue ~f ~child_epilogue ~tasks ->
   let task_bar = TaskBar.create ~jobs in
   let children_pipes = create_pipes jobs in
-  let make_child = if true then spawn_child else fork_child in
+  let make_child = if Config.fork_mode then fork_child else spawn_child in
   let slots =
     Array.init jobs ~f:(fun slot ->
         let child_pipe = List.nth_exn children_pipes slot in
