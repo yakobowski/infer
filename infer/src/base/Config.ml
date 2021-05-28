@@ -2113,8 +2113,8 @@ and results_dir =
 
 and run_as_child =
   CLOpt.mk_int_opt ~in_help:[] ~long:"run-as-child"
-    "Enable child mode when greater than 0. The integer argument is the identity of the child. \
-     This is an internal option."
+    "Enable child mode. The integer argument is the identity of the child. This is an internal \
+     option."
 
 
 and seconds_per_iteration =
